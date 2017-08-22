@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="lib/react.js"></script>
+    <script src="lib/react-dom.js"></script>
+    <script src="lib/browser.min.js"></script>
+  </head>
+  <body>
+    <div id="todoList"></div>
+    
+  <script>
+    var items = [
+      {text:'Sth1',id:1,statue:false},
+      {text:'Sth2',id:2,statue:true},
+      {text:'Sth3',id:3,statue:true},
+      {text:'Sth4',id:4,statue:true}
+    ]
+  </script>
+  <script type="text/babel">
+  var TodoListItem = React.createClass({    
+    getInitialState:function(){
+      return {
+        statue:this.props.statue
+      }
+    },
+    toggleState:function(){
+      this.setState({statue:!this.state.statue})
+    },
+    render:function(){
+      if(!this.state.statue){
+        return (
+          <li onClick={this.toggleState}>{this.props.text}</li>
+       )
+      }else{
+        return (
+          <li onClick={this.toggleState}><s>{this.props.text}</s></li>
+       )
+      }
+     
+    }
+  });
+  var TodoList = React.createClass({
+    render:function(){          
+        var listItem = this.props.list.map(function(item){
+           return <TodoListItem key={item.id} text={item.text} statue = {item.statue}></TodoListItem>
+        })
+        return (
+          <ul>
+            {listItem}
+          </ul>
+        )
+    }
+  });
+  var FilterLink = React.createClass({
+    render:function(){          
+        return (
+          <a href="javascript:void(0)" onClick={this.props.onClick.bind(null,this.props.filter)}>{this.props.text}</a>
+        )
+    }
+  });
+  var Footer = React.createClass({
+    render:function(){          
+        return (
+          <div>
+            <p>Filter:</p>
+            Done:
+            <FilterLink filter={true} text="Done" onClick={this.props.showState} />;
+            noDone:
+            <FilterLink filter={false} text="noDone" onClick={this.props.showState} />;
+            All:
+            <FilterLink filter="all" text="All" onClick={this.props.showState} />;
+          </div>
+        )
+    }
+  });
+
+  var id = 10;
+  var TodoApp = React.createClass({
+    getInitialState:function(){
+      return {
+          items:[]
+      }
+    },
+    componentDidMount:function(){
+      this.setState({items:items})
+    },
+    handleSubmit:function(e){
+      if(!this.refs.myTextInput.value){
+        e.preventDefault();
+        return false;
+      }
+      items.push({
+        text:this.refs.myTextInput.value,
+        id:id++,
+        statue:false
+      });
+      this.setState({items:items});
+      this.refs.myTextInput.value = "";
+      e.preventDefault();
+    },
+    showState:function(type){
+     var filterItems = [];
+      if(type == "all"){
+        filterItems = items
+      }else{
+        filterItems=items.filter((v)=>{
+          return v.statue == type;
+        })
+      }
+      this.setState({items:filterItems})
+    },
+    render:function(){
+        return (
+          <div>
+            <TodoList list = {this.state.items}/>
+            <form onSubmit={this.handleSubmit}>
+              <input type="text" ref="myTextInput" onChange={this.handleChange}/>
+              <input type="submit" value="Add" onClick={this.handleSubmit} />
+            </form>
+            <Footer showState={this.showState}/>
+          </div>
+        )
+    }
+  })
+  ReactDOM.render(<TodoApp items={items} />, todoList);
+  </script>
+  </body>
+</html>
